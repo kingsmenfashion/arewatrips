@@ -4,6 +4,8 @@ import Footer from "@/components/Footer";
 import HotelCard, { Hotel } from "@/components/hotels/HotelCard";
 import HotelBookingModal from "@/components/hotels/HotelBookingModal";
 import { Shield, Banknote, MessageCircle } from "lucide-react";
+import green from "@/assets/at.jpeg";
+import white from "@/assets/wh.jpeg";
 
 // Sample hotel data
 const hotels: Hotel[] = [
@@ -11,7 +13,7 @@ const hotels: Hotel[] = [
     id: "1",
     name: "Grand Palace Hotel",
     location: "GRA, Maiduguri",
-    image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800&auto=format&fit=crop&q=60",
+    image: white,
     startingPrice: 18000,
     amenities: ["Free WiFi", "Free Parking", "Restaurant"],
     rooms: [
@@ -24,7 +26,7 @@ const hotels: Hotel[] = [
     id: "2",
     name: "Maiduguri Comfort Inn",
     location: "Shehu Laminu Way, Maiduguri",
-    image: "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800&auto=format&fit=crop&q=60",
+    image: green,
     startingPrice: 12000,
     amenities: ["Free WiFi", "Breakfast", "Air Conditioning"],
     rooms: [
@@ -37,7 +39,7 @@ const hotels: Hotel[] = [
     id: "3",
     name: "Sahel Continental",
     location: "Bama Road, Maiduguri",
-    image: "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?w=800&auto=format&fit=crop&q=60",
+    image: white,
     startingPrice: 25000,
     amenities: ["Free WiFi", "Gym", "Restaurant"],
     rooms: [
