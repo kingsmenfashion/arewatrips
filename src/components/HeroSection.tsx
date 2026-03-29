@@ -2,8 +2,10 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building2, Car } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
+import { useState } from 'react';
 
 const HeroSection = () => {
+  const [showHotelMessage, setShowHotelMessage] = useState(false);
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -40,19 +42,31 @@ const HeroSection = () => {
           
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
-            <Link to="/hotels">
-              <Button size="xl" className="gap-3">
-                <Building2 className="w-5 h-5" />
-                Book a Hotel
-              </Button>
-            </Link>
-            <Link to="/rides">
-              <Button size="xl" variant="heroOutline" className="gap-3">
-                <Car className="w-5 h-5" />
-                Book a Ride
-              </Button>
-            </Link>
-          </div>
+  {/* Disabled Book Hotel Button */}
+  <button
+    onClick={() => setShowHotelMessage(true)}
+    className="flex items-center justify-center gap-3 px-8 py-3 bg-gray-400 hover:bg-gray-500 text-white font-medium rounded-lg transition-colors cursor-not-allowed"
+    disabled
+  >
+    <Building2 className="w-5 h-5" />
+    Book a Hotel
+  </button>
+
+  {/* Message that appears after clicking */}
+  {showHotelMessage && (
+    <p className="text-green-600 font-medium text-center col-span-2 mt-2">
+      Coming soon.. 🏨 We'll notify you when hotel booking is available!
+    </p>
+  )}
+
+  {/* Book a Ride Button - remains unchanged */}
+  <Link to="/rides">
+    <Button size="xl" variant="heroOutline" className="gap-3">
+      <Car className="w-5 h-5" />
+      Book a Ride
+    </Button>
+  </Link>
+</div>
           
           {/* Trust Indicators */}
           <div className="flex flex-wrap items-center justify-center gap-6 mt-12 pt-8 border-t border-primary-foreground/20 animate-fade-up" style={{ animationDelay: "0.4s" }}>
