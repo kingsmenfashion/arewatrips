@@ -19,9 +19,9 @@ const rideTypes = [
   {
     id: "City Ride",
     icon: Car,
-    title: "City Ride",
-    description: "Comfortable rides within Maiduguri city",
-    price: "From NGN 2,000",
+    title: "UNIMAID Ride",
+    description: "Have a ride in UNIMAID within 5 minutes",
+    price: "From NGN 1,200",
   },
   {
     id: "Hourly Charter",

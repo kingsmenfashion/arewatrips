@@ -218,7 +218,7 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
       {/* Submit Button */}
       <Button type="submit" size="lg" variant="gold" className="w-full gap-2">
         <MessageCircle className="w-5 h-5" />
-        Get Quote via WhatsApp
+        Book NOW via WhatsApp
       </Button>
     </form>
   );
