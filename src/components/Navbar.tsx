@@ -1,11 +1,69 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, X, MessageCircle } from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { useAuth } from "@/contexts/auth-context";
+import { toast } from "@/hooks/use-toast";
+import { signInWithGoogle, signOut, type AuthUser } from "@/lib/auth";
+import { LogOut, Menu, MessageCircle, X } from "lucide-react";
+
+const getDisplayName = (user: AuthUser) =>
+  user.user_metadata?.full_name ||
+  user.user_metadata?.name ||
+  user.email ||
+  "Signed-in user";
+
+const getAvatarUrl = (user: AuthUser) =>
+  user.user_metadata?.avatar_url || user.user_metadata?.picture || "";
+
+const getInitial = (name: string) => name.trim().charAt(0).toUpperCase() || "?";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const location = useLocation();
+  const [isAuthActionPending, setIsAuthActionPending] = useState(false);
+  const { user, isLoading } = useAuth();
+  const displayName = user ? getDisplayName(user) : "";
+  const avatarUrl = user ? getAvatarUrl(user) : "";
+
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsAuthActionPending(true);
+      await signInWithGoogle();
+    } catch (error) {
+      toast({
+        title: "Could not start Google sign in",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+      setIsAuthActionPending(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      setIsAuthActionPending(true);
+      await signOut();
+      toast({ title: "Signed out successfully" });
+    } catch (error) {
+      toast({
+        title: "Could not sign out",
+        description:
+          error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsAuthActionPending(false);
+    }
+  };
 
   const navLinks = [
     { name: "Home", href: "/", isRoute: true },
@@ -13,6 +71,56 @@ const Navbar = () => {
     { name: "Rides", href: "/rides", isRoute: true },
     { name: "Contact", href: "/contact", isRoute: true },
   ];
+
+  const renderAccountMenu = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          className="rounded-full outline-none ring-offset-background transition-transform hover:scale-105 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          aria-label="Open account menu"
+        >
+          <Avatar className="h-10 w-10 border-2 border-primary/20">
+            {avatarUrl && <AvatarImage src={avatarUrl} alt={displayName} />}
+            <AvatarFallback className="bg-secondary text-sm font-bold text-primary">
+              {user ? getInitial(displayName) : "?"}
+            </AvatarFallback>
+          </Avatar>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-64">
+        {user ? (
+          <>
+            <DropdownMenuLabel className="space-y-1">
+              <p className="truncate font-semibold">{displayName}</p>
+              {user.email && (
+                <p className="truncate text-xs font-normal text-muted-foreground">
+                  {user.email}
+                </p>
+              )}
+            </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem
+              onClick={handleSignOut}
+              disabled={isAuthActionPending}
+              className="cursor-pointer text-destructive focus:text-destructive"
+            >
+              <LogOut className="mr-2 h-4 w-4" />
+              {isAuthActionPending ? "Signing out..." : "Logout"}
+            </DropdownMenuItem>
+          </>
+        ) : (
+          <DropdownMenuItem
+            onClick={handleGoogleSignIn}
+            disabled={isLoading || isAuthActionPending}
+            className="cursor-pointer"
+          >
+            {isAuthActionPending ? "Redirecting..." : "Sign In with Google"}
+          </DropdownMenuItem>
+        )}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
@@ -75,15 +183,20 @@ const Navbar = () => {
   </Button>
 </a>
 
+            {renderAccountMenu()}
           </div>
 
           {/* Mobile Menu Button */}
-          <button
-            className="md:hidden p-2 text-foreground"
-            onClick={() => setIsOpen(!isOpen)}
-          >
-            {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          <div className="flex items-center gap-3 md:hidden">
+            {renderAccountMenu()}
+            <button
+              className="p-2 text-foreground"
+              onClick={() => setIsOpen(!isOpen)}
+              aria-label="Toggle navigation menu"
+            >
+              {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}

@@ -2,11 +2,12 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { Button } from "@/components/ui/button";
 import RideBookingForm from "@/components/rides/RideBookingForm";
 import RideTypeCard from "@/components/rides/RideTypeCard";
 import PopularRoutes from "@/components/rides/PopularRoutes";
 import RideFAQ from "@/components/rides/RideFAQ";
-import { Plane, Car, Clock, Shield, Banknote, MessageCircle, MapPin, CheckCircle } from "lucide-react";
+import { Plane, Car, Clock, Shield, Banknote, MessageCircle, MapPin, CheckCircle, Users } from "lucide-react";
 
 const rideTypes = [
   {
@@ -117,6 +118,25 @@ const Rides = () => {
                       onSelect={() => setSelectedRideType(ride.id)}
                     />
                   ))}
+                </div>
+
+                <div className="mt-6 rounded-2xl border border-primary/20 bg-secondary/50 p-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Users className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-foreground">Ride in Group</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Join students moving between Unimaid Park, Complex, Hostel, and Education.
+                        </p>
+                      </div>
+                    </div>
+                    <Button asChild className="w-full sm:w-auto">
+                      <Link to="/student-groups">Ride in Group</Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
 

@@ -19,6 +19,9 @@ import { MapPin, CalendarIcon, Clock, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
+import { createRideBooking } from "@/lib/bookings";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
 
 const bookingSchema = z.object({
   pickup: z.string().trim().min(1, "Pickup location is required").max(100),
@@ -47,8 +50,9 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState("");
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const formData = {
@@ -73,25 +77,42 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
     }
 
     setErrors({});
+    setIsSubmitting(true);
 
-    // Build WhatsApp message
-    const message = encodeURIComponent(
-      `Hello Arewa Trips! I'd like to book a ride:\n\n` +
-      `📍 Pickup: ${pickup}\n` +
-      `📍 Dropoff: ${dropoff}\n` +
-      `📅 Date: ${date ? format(date, "PPP") : ""}\n` +
-      `🕐 Time: ${time}\n` +
-      `🚗 Ride Type: ${selectedRideType}\n\n` +
-      `Please confirm availability and price.`
-    );
+    try {
+      await createRideBooking(result.data);
 
-    // Open WhatsApp
-    window.open(`https://wa.me/2347034909853?text=${message}`, "_blank");
+      if (!isSupabaseConfigured) {
+        toast({
+          title: "Supabase is not configured",
+          description: "Add your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to save bookings.",
+        });
+      }
+
+      const message = encodeURIComponent(
+        `Hello Arewa Trips! I'd like to book a ride:\n\n` +
+        `Pickup: ${pickup}\n` +
+        `Dropoff: ${dropoff}\n` +
+        `Date: ${date ? format(date, "PPP") : ""}\n` +
+        `Time: ${time}\n` +
+        `Ride Type: ${selectedRideType}\n\n` +
+        `Please confirm availability and price.`
+      );
+
+      window.open(`https://wa.me/2347034909853?text=${message}`, "_blank");
+    } catch (error) {
+      toast({
+        title: "Could not save booking",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
-      {/* Pickup Location */}
       <div className="space-y-2">
         <Label htmlFor="pickup" className="text-foreground font-medium">
           Pickup Location
@@ -111,7 +132,6 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
         )}
       </div>
 
-      {/* Dropoff Location */}
       <div className="space-y-2">
         <Label htmlFor="dropoff" className="text-foreground font-medium">
           Dropoff Location
@@ -131,9 +151,7 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
         )}
       </div>
 
-      {/* Date & Time Row */}
       <div className="grid grid-cols-2 gap-4">
-        {/* Date */}
         <div className="space-y-2">
           <Label className="text-foreground font-medium">Date</Label>
           <Popover>
@@ -166,7 +184,6 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
           )}
         </div>
 
-        {/* Time */}
         <div className="space-y-2">
           <Label className="text-foreground font-medium">Time</Label>
           <Select value={time} onValueChange={setTime}>
@@ -188,7 +205,6 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
         </div>
       </div>
 
-      {/* Ride Type (if not selected from cards) */}
       {!selectedRideType && (
         <div className="space-y-2">
           <Label className="text-foreground font-medium">Ride Type</Label>
@@ -215,10 +231,9 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
         </div>
       )}
 
-      {/* Submit Button */}
-      <Button type="submit" size="lg" variant="gold" className="w-full gap-2">
+      <Button type="submit" size="lg" variant="gold" className="w-full gap-2" disabled={isSubmitting}>
         <MessageCircle className="w-5 h-5" />
-        Book NOW via WhatsApp
+        {isSubmitting ? "Saving..." : "Book NOW via WhatsApp"}
       </Button>
     </form>
   );

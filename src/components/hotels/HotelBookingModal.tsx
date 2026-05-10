@@ -25,7 +25,10 @@ import {
 } from "@/components/ui/popover";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Hotel, HotelRoom } from "./HotelCard";
+import { Hotel } from "./HotelCard";
+import { createHotelBooking } from "@/lib/bookings";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { toast } from "@/hooks/use-toast";
 
 interface HotelBookingModalProps {
   hotel: Hotel | null;
@@ -38,20 +41,20 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
   const [checkInDate, setCheckInDate] = useState<Date | undefined>();
   const [checkOutDate, setCheckOutDate] = useState<Date | undefined>();
   const [currentPrice, setCurrentPrice] = useState<number>(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const today = startOfDay(new Date());
 
-  // Reset form when hotel changes
   useEffect(() => {
     if (hotel) {
       setRoomType("");
       setCheckInDate(undefined);
       setCheckOutDate(undefined);
       setCurrentPrice(hotel.startingPrice);
+      setIsSubmitting(false);
     }
   }, [hotel]);
 
-  // Update price when room type changes
   useEffect(() => {
     if (hotel && roomType) {
       const selectedRoom = hotel.rooms.find((room) => room.type === roomType);
@@ -63,22 +66,49 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
 
   const isFormValid = roomType && checkInDate && checkOutDate && checkOutDate > checkInDate;
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!hotel || !isFormValid) return;
 
-    const message = 
-      `Hello Arewa Trips, I would like to request a reservation.\n\n` +
-      `Hotel: ${hotel.name}\n\n` +
-      `Room Type: ${roomType}\n\n` +
-      `Price: ₦${currentPrice.toLocaleString()} / night\n\n` +
-      `Check-in: ${checkInDate ? format(checkInDate, "PPP") : ""}\n\n` +
-      `Check-out: ${checkOutDate ? format(checkOutDate, "PPP") : ""}`;
+    setIsSubmitting(true);
 
-    const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/2347034909853?text=${encodedMessage}`;
-    
-    window.open(whatsappUrl, "_blank", "noopener,noreferrer");
-    onClose();
+    try {
+      await createHotelBooking({
+        hotelName: hotel.name,
+        roomType,
+        pricePerNight: currentPrice,
+        checkInDate: checkInDate as Date,
+        checkOutDate: checkOutDate as Date,
+      });
+
+      if (!isSupabaseConfigured) {
+        toast({
+          title: "Supabase is not configured",
+          description: "Add your VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to save bookings.",
+        });
+      }
+
+      const message =
+        `Hello Arewa Trips, I would like to request a reservation.\n\n` +
+        `Hotel: ${hotel.name}\n\n` +
+        `Room Type: ${roomType}\n\n` +
+        `Price: NGN ${currentPrice.toLocaleString()} / night\n\n` +
+        `Check-in: ${checkInDate ? format(checkInDate, "PPP") : ""}\n\n` +
+        `Check-out: ${checkOutDate ? format(checkOutDate, "PPP") : ""}`;
+
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://wa.me/2347034909853?text=${encodedMessage}`;
+
+      window.open(whatsappUrl, "_blank", "noopener,noreferrer");
+      onClose();
+    } catch (error) {
+      toast({
+        title: "Could not save booking",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (!hotel) return null;
@@ -93,10 +123,8 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
           </DialogDescription>
         </DialogHeader>
 
-        {/* Scrollable content area */}
         <div className="flex-1 overflow-y-auto px-6 py-4">
           <div className="space-y-5">
-            {/* Hotel Name (Read-only) */}
             <div className="space-y-2">
               <Label htmlFor="hotel-name">Hotel Name</Label>
               <Input
@@ -107,7 +135,6 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
               />
             </div>
 
-            {/* Room Type */}
             <div className="space-y-2">
               <Label htmlFor="room-type">Room Type *</Label>
               <Select value={roomType} onValueChange={setRoomType}>
@@ -124,17 +151,15 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
               </Select>
             </div>
 
-            {/* Price per Night (Read-only) */}
             <div className="space-y-2">
               <Label>Price per Night</Label>
               <div className="flex items-center h-10 px-3 rounded-md border border-input bg-muted">
                 <span className="text-foreground font-medium">
-                  ₦{currentPrice.toLocaleString()} / night
+                  NGN {currentPrice.toLocaleString()} / night
                 </span>
               </div>
             </div>
 
-            {/* Check-in Date */}
             <div className="space-y-2">
               <Label>Check-in Date *</Label>
               <Popover>
@@ -163,7 +188,6 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
               </Popover>
             </div>
 
-            {/* Check-out Date */}
             <div className="space-y-2">
               <Label>Check-out Date *</Label>
               <Popover>
@@ -184,7 +208,7 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
                     mode="single"
                     selected={checkOutDate}
                     onSelect={setCheckOutDate}
-                    disabled={(date) => 
+                    disabled={(date) =>
                       startOfDay(date) < today || (checkInDate ? date <= checkInDate : false)
                     }
                     initialFocus
@@ -201,18 +225,17 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
           </div>
         </div>
 
-        {/* Sticky footer with actions */}
-        <div className=" bg-background border-t px-6 py-4">
+        <div className="bg-background border-t px-6 py-4">
           <div className="flex flex-col-reverse sm:flex-row gap-3">
             <Button variant="outline" onClick={onClose} className="flex-1">
               Cancel
             </Button>
             <Button
               onClick={handleContinue}
-              disabled={!isFormValid}
+              disabled={!isFormValid || isSubmitting}
               className="flex-1"
             >
-              Continue
+              {isSubmitting ? "Saving..." : "Continue"}
             </Button>
           </div>
         </div>
