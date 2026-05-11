@@ -47,7 +47,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     initializeAuth();
 
     // 2. Listen for changes (this catches the redirect result)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       console.info(`[auth] Auth state changed: ${event}`);
       
       if (!mounted) return;
@@ -59,7 +59,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         // Prevent double-syncing if already handled
         if (syncedUserIdRef.current !== currentSession.user.id) {
           syncedUserIdRef.current = currentSession.user.id;
-          await syncUserProfile(currentSession.user).catch(console.error);
+          setTimeout(() => {
+            syncUserProfile(currentSession.user).catch(console.error);
+          }, 0);
         }
       }
       

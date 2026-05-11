@@ -92,6 +92,23 @@ const Rides = () => {
                     selectedRideType={selectedRideType}
                     onRideTypeChange={setSelectedRideType}
                   />
+                  <div className="mt-6 rounded-xl border border-primary/20 bg-secondary/50 p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Users className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <h3 className="font-bold text-foreground">Ride in Group</h3>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          Join students moving between Unimaid Park, Complex,
+                          Hostel, and Education.
+                        </p>
+                      </div>
+                    </div>
+                    <Button asChild className="mt-4 w-full">
+                      <Link to="/student-groups">Ride in Group</Link>
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -120,24 +137,6 @@ const Rides = () => {
                   ))}
                 </div>
 
-                <div className="mt-6 rounded-2xl border border-primary/20 bg-secondary/50 p-5">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex items-start gap-4">
-                      <div className="w-11 h-11 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <Users className="w-5 h-5 text-primary" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-foreground">Ride in Group</h3>
-                        <p className="text-sm text-muted-foreground mt-1">
-                          Join students moving between Unimaid Park, Complex, Hostel, and Education.
-                        </p>
-                      </div>
-                    </div>
-                    <Button asChild className="w-full sm:w-auto">
-                      <Link to="/student-groups">Ride in Group</Link>
-                    </Button>
-                  </div>
-                </div>
               </div>
 
               {/* Trust Features */}

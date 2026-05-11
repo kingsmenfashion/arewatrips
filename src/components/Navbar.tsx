@@ -173,15 +173,9 @@ const Navbar = () => {
   </Button>
 </a>
 
-<a
-  href="https://wa.me/2347034909853?text=Hello%2C%20I%20want%20to%20book%20a%20ride%20with%20Arewa%20Trips"
-  target="_blank"
-  rel="noopener noreferrer"
->
-  <Button className="justify-center w-full">
-    Book Now
-  </Button>
-</a>
+<Button asChild className="justify-center w-full">
+  <Link to="/rides">Book Now</Link>
+</Button>
 
             {renderAccountMenu()}
           </div>

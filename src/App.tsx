@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Rides from "./pages/Rides";
 import Hotels from "./pages/Hotels";
 import StudentGroups from "./pages/StudentGroups";
+import AuthCallback from "./pages/AuthCallback";
 import NotFound from "./pages/NotFound";
 import About from "./pages/about";
 import Contact from "./pages/contact";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/rides" element={<Rides />} />
             <Route path="/hotels" element={<Hotels />} />
             <Route path="/student-groups" element={<StudentGroups />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}

@@ -28,7 +28,7 @@ export async function signInWithGoogle() {
   const { error } = await client.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${window.location.origin}/auth/callback`,
+      redirectTo: `${window.location.origin}/student-groups`,
     },
   });
 
@@ -40,7 +40,7 @@ export async function signInWithGoogle() {
 export async function signOut() {
   const client = requireSupabase();
   console.info("[auth] Signing out current user.");
-  const { error } = await client.auth.signOut();
+  const { error } = await client.auth.signOut({ scope: "local" });
 
   if (error) {
     console.error("[auth] Sign out failed:", error.message);
