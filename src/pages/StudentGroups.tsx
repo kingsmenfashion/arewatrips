@@ -5,8 +5,11 @@ import Footer from "@/components/Footer";
 import {
   createTravelGroup,
   fetchTravelGroups,
+  joinTravelGroup,
+  leaveTravelGroup,
   type TravelGroup,
 } from "@/lib/groups";
+import CheckoutModal from "@/components/rides/CheckoutModal";
 import { useAuth } from "@/contexts/auth-context";
 import GoogleAuthPanel from "@/components/auth/GoogleAuthPanel";
 import { toast } from "@/hooks/use-toast";
@@ -29,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import {
   Banknote,
+  Clock,
   GraduationCap,
   MapPin,
   Plus,
@@ -36,8 +40,16 @@ import {
   Users,
 } from "lucide-react";
 
-const campusLocations = ["Unimaid Park", "Complex", "Hostel", "Education"];
+const campusLocations = ["Unimaid Park", "Complex", "Hostel", "Education", "Main gate, Kashim Ibrahim University", "Post Office"];
 const seatOptions = [1, 2, 3, 4];
+
+const formatDepartureTime = (date: string) =>
+  new Intl.DateTimeFormat("en-NG", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(new Date(date));
 
 const StudentGroups = () => {
   const [groups, setGroups] = useState<TravelGroup[]>([]);
@@ -48,14 +60,20 @@ const StudentGroups = () => {
   const [seatsReserved, setSeatsReserved] = useState("1");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [joiningGroupId, setJoiningGroupId] = useState<string | null>(null);
+  const [leavingGroupId, setLeavingGroupId] = useState<string | null>(null);
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [checkoutGroup, setCheckoutGroup] = useState<TravelGroup | null>(null);
   const { user: authUser, isLoading: isLoadingAuth } = useAuth();
 
-  const loadGroups = useCallback(async () => {
+  const loadGroups = useCallback(async (showLoading = true) => {
     try {
-      setIsLoadingGroups(true);
+      if (showLoading) {
+        setIsLoadingGroups(true);
+      }
       setGroupsError(null);
 
-      const activeGroups = await fetchTravelGroups();
+      const activeGroups = await fetchTravelGroups(authUser?.id);
       setGroups(activeGroups);
     } catch (error) {
       const message =
@@ -65,9 +83,11 @@ const StudentGroups = () => {
 
       setGroupsError(message);
     } finally {
-      setIsLoadingGroups(false);
+      if (showLoading) {
+        setIsLoadingGroups(false);
+      }
     }
-  }, []);
+  }, [authUser?.id]);
 
   useEffect(() => {
     loadGroups();
@@ -130,6 +150,105 @@ const StudentGroups = () => {
       });
     } finally {
       setIsCreatingGroup(false);
+    }
+  };
+
+  const handleJoinGroup = async (group: TravelGroup) => {
+    if (!authUser) {
+      toast({
+        title: "Please login first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (group.currentUserMembership) {
+      toast({
+        title: "Already joined this group",
+      });
+      return;
+    }
+
+    if (group.availableSeats < 1) {
+      toast({
+        title: "Group is already full",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setJoiningGroupId(group.id);
+
+    try {
+      const joinedGroup = await joinTravelGroup(group.id);
+
+      setGroups((currentGroups) =>
+        currentGroups.map((currentGroup) =>
+          currentGroup.id === joinedGroup.id ? joinedGroup : currentGroup
+        )
+      );
+
+      toast({
+        title: "Successfully joined group",
+      });
+
+      loadGroups(false).catch((error) => {
+        console.error("[groups] Could not refresh groups after join:", error);
+      });
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Unable to join group.";
+      const toastTitle = message.includes("Already joined")
+        ? "Already joined this group"
+        : message.includes("full")
+          ? "Group is already full"
+          : message.includes("sign in") || message.includes("login")
+            ? "Please login first"
+            : "Could not join group";
+
+      toast({
+        title: toastTitle,
+        description:
+          toastTitle === "Could not join group" ? message : undefined,
+        variant:
+          toastTitle === "Already joined this group" ? "default" : "destructive",
+      });
+
+      await loadGroups(false);
+    } finally {
+      setJoiningGroupId(null);
+    }
+  };
+
+  const handleLeaveGroup = async (group: TravelGroup) => {
+    if (!authUser) return;
+
+    setLeavingGroupId(group.id);
+
+    try {
+      const updatedGroup = await leaveTravelGroup(group.id);
+
+      setGroups((currentGroups) =>
+        currentGroups.map((currentGroup) =>
+          currentGroup.id === updatedGroup.id ? updatedGroup : currentGroup
+        )
+      );
+
+      toast({
+        title: "Successfully left group",
+      });
+
+      loadGroups(false).catch((error) => {
+        console.error("[groups] Could not refresh groups after leave:", error);
+      });
+    } catch (error) {
+      toast({
+        title: "Could not leave group",
+        description: error instanceof Error ? error.message : "Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLeavingGroupId(null);
     }
   };
 
@@ -335,6 +454,23 @@ const StudentGroups = () => {
           {!isLoadingGroups && !groupsError && groups.length > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
               {groups.map((group) => {
+                const hasJoined = Boolean(group.currentUserMembership);
+                const isFull = group.availableSeats < 1;
+                const isJoining = joiningGroupId === group.id;
+                const joinButtonLabel = isJoining
+                  ? "Joining..."
+                  : hasJoined
+                    ? "Joined"
+                    : isFull
+                      ? "Group Full"
+                      : "Join Group";
+                const isJoinDisabled =
+                  isJoining ||
+                  hasJoined ||
+                  isFull ||
+                  group.status !== "open" ||
+                  isLoadingAuth;
+
                 return (
                   <article
                     key={group.id}
@@ -369,11 +505,87 @@ const StudentGroups = () => {
                       </div>
 
                       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                        <Clock className="w-4 h-4 text-primary" />
+                        <span>Departure time: {formatDepartureTime(group.expiry_date)}</span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 text-sm">
+                        <div className="rounded-lg bg-secondary p-3">
+                          <p className="text-xs font-semibold uppercase text-muted-foreground">
+                            Seats left
+                          </p>
+                          <p className="font-bold text-foreground mt-1">
+                            {group.availableSeats}
+                          </p>
+                        </div>
+                        <div className="rounded-lg bg-secondary p-3">
+                          <p className="text-xs font-semibold uppercase text-muted-foreground">
+                            Members
+                          </p>
+                          <p className="font-bold text-foreground mt-1">
+                            {group.joinedMemberCount}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
                         <Users className="w-4 h-4 text-primary" />
                         <span>
-                          {group.current_members}/{group.max_members} members
+                          {group.joinedSeats}/{group.max_members} seats reserved
                         </span>
                       </div>
+
+                      {hasJoined ? (
+                        isFull ? (
+                          <Button
+                            type="button"
+                            className="w-full bg-amber-500 hover:bg-amber-600 text-black font-extrabold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                            onClick={() => {
+                              setCheckoutGroup(group);
+                              setIsCheckoutOpen(true);
+                            }}
+                          >
+                            Proceed to Checkout
+                          </Button>
+                        ) : (
+                          <div className="flex gap-2 w-full">
+                            <Button
+                              type="button"
+                              className="flex-grow"
+                              disabled
+                              variant="secondary"
+                            >
+                              Joined (Waiting...)
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              disabled={leavingGroupId === group.id}
+                              onClick={() => handleLeaveGroup(group)}
+                            >
+                              {leavingGroupId === group.id ? "Leaving..." : "Leave"}
+                            </Button>
+                          </div>
+                        )
+                      ) : isFull ? (
+                        <Button
+                          type="button"
+                          className="w-full"
+                          disabled
+                          variant="secondary"
+                        >
+                          Group Full
+                        </Button>
+                      ) : (
+                        <Button
+                          type="button"
+                          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                          disabled={joiningGroupId === group.id || isLoadingAuth}
+                          onClick={() => handleJoinGroup(group)}
+                        >
+                          {joiningGroupId === group.id ? "Joining..." : "Join Group"}
+                        </Button>
+                      )}
                     </div>
                   </article>
                 );
@@ -382,6 +594,24 @@ const StudentGroups = () => {
           )}
         </div>
       </section>
+
+      {checkoutGroup && (
+        <CheckoutModal
+          isOpen={isCheckoutOpen}
+          onOpenChange={(open) => {
+            setIsCheckoutOpen(open);
+            if (!open) setCheckoutGroup(null);
+          }}
+          groupId={checkoutGroup.id}
+          origin={checkoutGroup.origin}
+          destination={checkoutGroup.destination}
+          pricePerSeat={500}
+          passengerName={authUser?.user_metadata?.full_name || authUser?.user_metadata?.name || authUser?.email || "Arewa Trips Passenger"}
+          onCheckoutSuccess={async () => {
+            await loadGroups(false);
+          }}
+        />
+      )}
 
       <Footer />
     </div>
