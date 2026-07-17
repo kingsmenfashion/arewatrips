@@ -26,7 +26,7 @@ const hotels: Hotel[] = [
     id: "2",
     name: "Maiduguri Comfort Inn",
     location: "Shehu Laminu Way, Maiduguri",
-    image: green,
+    image: "https://zenpclsjumslwuivbfmz.supabase.co/storage/v1/object/public/hotel-images/grand-pinnacle-hotel/image2.jpg",
     startingPrice: 12000,
     amenities: ["Free WiFi", "Breakfast", "Air Conditioning"],
     rooms: [
