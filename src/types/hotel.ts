@@ -39,8 +39,24 @@ export interface HotelImage {
 export interface HotelAmenity {
   id: string;
   hotel_id: string | null;
-  amenity_name: string;
+  name: string;
   created_at: string | null;
+}
+
+/**
+ * Represents an available room variant associated with a hotel.
+ */
+export interface HotelRoom {
+  id: string;
+  hotel_id: string | null;
+  name: string;
+  short_description: string | null;
+  full_description: string | null;
+  price: number;
+  capacity: number | null;
+  image_url: string | null;
+  image_index: number | null;
+  is_available: boolean | null;
 }
 
 /**

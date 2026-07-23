@@ -1,4 +1,0 @@
-User-agent: *
-Allow: /
-
-Sitemap: https://arewatrips.netlify.app/sitemap.xml

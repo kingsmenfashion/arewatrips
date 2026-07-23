@@ -2,10 +2,8 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Building2, Car } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
-import { useState } from 'react';
 
 const HeroSection = () => {
-  const [showHotelMessage, setShowHotelMessage] = useState(false);
   return (
     <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
       {/* Background Image */}
@@ -42,22 +40,13 @@ const HeroSection = () => {
           
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
-  {/* Disabled Book Hotel Button */}
-  <button
-    onClick={() => setShowHotelMessage(true)}
-    className="flex items-center justify-center gap-3 px-8 py-3 bg-gray-400 hover:bg-gray-500 text-white font-medium rounded-lg transition-colors cursor-not-allowed"
-    disabled
-  >
-    <Building2 className="w-5 h-5" />
-    Book a Hotel
-  </button>
-
-  {/* Message that appears after clicking */}
-  {showHotelMessage && (
-    <p className="text-green-600 font-medium text-center col-span-2 mt-2">
-      Coming soon.. 🏨 We'll notify you when hotel booking is available!
-    </p>
-  )}
+  {/* Book Hotel Button */}
+  <Link to="/hotels">
+    <Button size="xl" variant="default" className="gap-3">
+      <Building2 className="w-5 h-5" />
+      Book a Hotel
+    </Button>
+  </Link>
 
   {/* Book a Ride Button - remains unchanged */}
   <Link to="/rides">

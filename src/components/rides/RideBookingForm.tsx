@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,8 +15,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin, CalendarIcon, Clock, MessageCircle } from "lucide-react";
-import { format } from "date-fns";
+import { MapPin, CalendarIcon, Clock, MessageCircle, Car } from "lucide-react";
+import { format, isToday } from "date-fns";
 import { cn } from "@/lib/utils";
 import { z } from "zod";
 import { createRideBooking } from "@/lib/bookings";
@@ -44,13 +44,58 @@ const timeSlots = [
   "06:00 PM", "07:00 PM", "08:00 PM", "09:00 PM", "10:00 PM",
 ];
 
-const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookingFormProps) => {
+const parseTimeSlot = (slot: string) => {
+  const [timePart, ampm] = slot.split(" ");
+  let [hours, minutes] = timePart.split(":").map(Number);
+  if (ampm === "PM" && hours !== 12) {
+    hours += 12;
+  } else if (ampm === "AM" && hours === 12) {
+    hours = 0;
+  }
+  return { hours, minutes };
+};
+
+const RideBookingForm = ({ selectedRideType = "City Ride", onRideTypeChange }: RideBookingFormProps) => {
   const [pickup, setPickup] = useState("");
   const [dropoff, setDropoff] = useState("");
   const [date, setDate] = useState<Date>();
   const [time, setTime] = useState("");
+  const [vehicleType, setVehicleType] = useState<"keke" | "car">("keke");
   const [errors, setErrors] = useState<Partial<Record<keyof BookingFormData, string>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Filter time slots dynamically if the selected date is today
+  const filteredTimeSlots = timeSlots.filter((slot) => {
+    if (!date || !isToday(date)) return true;
+    const { hours: slotHours, minutes: slotMinutes } = parseTimeSlot(slot);
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+    if (slotHours > currentHours) return true;
+    if (slotHours === currentHours && slotMinutes > currentMinutes) return true;
+    return false;
+  });
+
+  // If the currently selected time becomes invalid (e.g. user changes date to today), clear it
+  useEffect(() => {
+    if (date && time && isToday(date)) {
+      const { hours: slotHours, minutes: slotMinutes } = parseTimeSlot(time);
+      const now = new Date();
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const isPast = slotHours < currentHours || (slotHours === currentHours && slotMinutes <= currentMinutes);
+      if (isPast) {
+        setTime("");
+      }
+    }
+  }, [date, time]);
+
+  const isValid =
+    pickup.trim() !== "" &&
+    dropoff.trim() !== "" &&
+    date !== undefined &&
+    time !== "" &&
+    selectedRideType !== "";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +125,13 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
     setIsSubmitting(true);
 
     try {
-      await createRideBooking(result.data);
+      const vehicleLabel = vehicleType === "keke" ? "Keke (Tricycle)" : "Car";
+      
+      // Save to Supabase (appending vehicle label in rideType)
+      await createRideBooking({
+        ...result.data,
+        rideType: `${selectedRideType} (${vehicleLabel})`,
+      });
 
       if (!isSupabaseConfigured) {
         toast({
@@ -89,17 +140,12 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
         });
       }
 
+      const formattedDate = date ? format(date, "PPP") : "";
       const message = encodeURIComponent(
-        `Hello Arewa Trips! I'd like to book a ride:\n\n` +
-        `Pickup: ${pickup}\n` +
-        `Dropoff: ${dropoff}\n` +
-        `Date: ${date ? format(date, "PPP") : ""}\n` +
-        `Time: ${time}\n` +
-        `Ride Type: ${selectedRideType}\n\n` +
-        `Please confirm availability and price.`
+        `Hello ArewaTrips, I'd like to book a ${vehicleLabel} (${selectedRideType}) from ${pickup} to ${dropoff} on ${formattedDate} at ${time}.`
       );
 
-      window.open(`https://wa.me/2347034909853?text=${message}`, "_blank");
+      window.open(`https://wa.me/2348022444596?text=${message}`, "_blank");
     } catch (error) {
       toast({
         title: "Could not save booking",
@@ -151,7 +197,41 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      {/* Vehicle Type Switcher Toggle - Responsive classes */}
+      <div className="space-y-2">
+        <Label className="text-foreground font-medium">Vehicle Option</Label>
+        <div className="grid grid-cols-2 gap-1.5 bg-secondary/50 p-1 rounded-xl">
+          <button
+            type="button"
+            onClick={() => setVehicleType("keke")}
+            className={cn(
+              "flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 rounded-lg text-xs sm:text-sm font-semibold transition-all",
+              vehicleType === "keke"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            )}
+          >
+            <span className="text-sm sm:text-base">🛺</span>
+            <span>Keke (Tricycle)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setVehicleType("car")}
+            className={cn(
+              "flex items-center justify-center gap-1 sm:gap-2 py-2 px-2 rounded-lg text-xs sm:text-sm font-semibold transition-all",
+              vehicleType === "car"
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+            )}
+          >
+            <Car className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+            <span>Car</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Date & Time Grid - Responsive column layouts to eliminate horizontal scroll */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label className="text-foreground font-medium">Date</Label>
           <Popover>
@@ -192,7 +272,7 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
               <SelectValue placeholder="Select time" />
             </SelectTrigger>
             <SelectContent>
-              {timeSlots.map((slot) => (
+              {filteredTimeSlots.map((slot) => (
                 <SelectItem key={slot} value={slot}>
                   {slot}
                 </SelectItem>
@@ -226,12 +306,18 @@ const RideBookingForm = ({ selectedRideType = "", onRideTypeChange }: RideBookin
 
       {selectedRideType && (
         <div className="bg-secondary/50 rounded-lg p-3 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Selected:</span>
+          <span className="text-sm text-muted-foreground">Selected Option:</span>
           <span className="font-semibold text-foreground">{selectedRideType}</span>
         </div>
       )}
 
-      <Button type="submit" size="lg" variant="gold" className="w-full gap-2" disabled={isSubmitting}>
+      <Button
+        type="submit"
+        size="lg"
+        variant="gold"
+        className="w-full gap-2"
+        disabled={isSubmitting || !isValid}
+      >
         <MessageCircle className="w-5 h-5" />
         {isSubmitting ? "Saving..." : "Book NOW via WhatsApp"}
       </Button>
