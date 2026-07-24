@@ -96,7 +96,7 @@ const HotelBookingModal = ({ hotel, isOpen, onClose }: HotelBookingModalProps) =
         `Check-out: ${checkOutDate ? format(checkOutDate, "PPP") : ""}`;
 
       const encodedMessage = encodeURIComponent(message);
-      const whatsappUrl = `https://wa.me/2348022444596?text=${encodedMessage}`;
+      const whatsappUrl = `https://wa.me/2348022444956?text=${encodedMessage}`;
 
       window.open(whatsappUrl, "_blank", "noopener,noreferrer");
       onClose();

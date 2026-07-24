@@ -111,7 +111,7 @@ const DeliveryBookingForm = ({ selectedCategory = "", onCategoryChange }: Delive
         description: "Redirecting to WhatsApp to complete your request.",
       });
 
-      window.open(`https://wa.me/2348022444596?text=${message}`, "_blank");
+      window.open(`https://wa.me/2348022444956?text=${message}`, "_blank");
     } catch (error) {
       toast({
         title: "Error submitting request",

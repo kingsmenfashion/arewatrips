@@ -128,7 +128,7 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <a
-  href="https://wa.me/2348022444596?text=Hello%2C%20Arewa%20Trips" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+  href="https://wa.me/2348022444956?text=Hello%2C%20Arewa%20Trips" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-gradient-green flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-lg">A</span>
             </div>
@@ -163,7 +163,7 @@ const Navbar = () => {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-3">
             <a
-  href="https://wa.me/2348022444596?text=Hello%2C%20Arewa%20Trips"
+  href="https://wa.me/2348022444956?text=Hello%2C%20Arewa%20Trips"
   target="_blank"
   rel="noopener noreferrer"
 >

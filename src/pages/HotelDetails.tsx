@@ -128,6 +128,13 @@ export default function HotelDetails() {
     };
   }, [slug]);
 
+  const handleBookNow = useCallback(() => {
+    if (!hotel || !selectedRoom) return;
+    const formattedPrice = selectedRoom.price.toLocaleString("en-NG");
+    const message = `Hello Arewa Trips,\n\nI would like to book a hotel.\n\nHotel: ${hotel.name}\nRoom: ${selectedRoom.name}\nPrice: ₦${formattedPrice}\n \nper night \n\n\nThank you.`;
+    window.open(`https://wa.me/2348022444956?text=${encodeURIComponent(message)}`, "_blank");
+  }, [hotel, selectedRoom]);
+
   if (isLoading) return <main className="p-6 text-center text-muted-foreground">Loading hotel...</main>;
   if (error) return <main className="p-6 text-center text-destructive" role="alert">{error}</main>;
   if (!hotel) return <main className="p-6 text-center text-muted-foreground">Hotel not found.</main>;
@@ -135,6 +142,7 @@ export default function HotelDetails() {
   const roomDescription = expanded
     ? selectedRoom?.full_description ?? selectedRoom?.short_description
     : selectedRoom?.short_description;
+
 
   return (
     <main className="min-h-screen bg-background pb-24 font-sans">
@@ -216,7 +224,12 @@ export default function HotelDetails() {
       <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-card/95 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-5xl items-center justify-between gap-4">
           <p className="text-lg font-extrabold text-accent">{selectedRoom ? formatNaira(selectedRoom.price) : "Unavailable"}</p>
-          <button type="button" disabled={!selectedRoom} className="rounded-md bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50">
+          <button
+            type="button"
+            disabled={!selectedRoom}
+            onClick={handleBookNow}
+            className="rounded-md bg-primary px-6 py-3 text-sm font-bold text-primary-foreground transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+          >
             Book now
           </button>
         </div>

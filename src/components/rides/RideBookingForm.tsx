@@ -145,7 +145,7 @@ const RideBookingForm = ({ selectedRideType = "City Ride", onRideTypeChange }: R
         `Hello ArewaTrips, I'd like to book a ${vehicleLabel} (${selectedRideType}) from ${pickup} to ${dropoff} on ${formattedDate} at ${time}.`
       );
 
-      window.open(`https://wa.me/2348022444596?text=${message}`, "_blank");
+      window.open(`https://wa.me/2348022444956?text=${message}`, "_blank");
     } catch (error) {
       toast({
         title: "Could not save booking",
