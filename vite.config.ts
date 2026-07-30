@@ -1,6 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
-import path from "path";
+import path, { resolve } from "path";
 import { componentTagger } from "lovable-tagger";
 import sitemap from 'vite-plugin-sitemap';
 
@@ -13,10 +13,25 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
-  plugins: [react(), sitemap({ hostname: "https://arewatrips.netlify.app" }), mode === "development" && componentTagger()].filter(Boolean) as any,
+  plugins: [
+    react(),
+    sitemap({
+      hostname: "https://arewatrips.netlify.app",
+      dynamicRoutes: [
+        "/",
+        "/hotels",
+        "/ride-booking",
+        "/delivery",
+        "/group-rides",
+        "/hotels/grand-pinnacle-hotel",
+      ],
+      generateRobotsTxt: false,
+    }),
+    mode === "development" && componentTagger(),
+  ].filter(Boolean) as any,
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": resolve(__dirname, "./src"),
     },
   },
 }));

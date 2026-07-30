@@ -5,6 +5,7 @@ import { HotelCarousel } from "@/components/hotels/HotelCarousel";
 import { RoomSelector } from "@/components/hotels/RoomSelector";
 import { supabase } from "@/lib/supabase";
 import type { Hotel, HotelAmenity, HotelImage, HotelRoom } from "@/types/hotel";
+import { Helmet, HelmetProvider } from "react-helmet-async";
 
 const formatNaira = (price: number) => `₦${price.toLocaleString("en-NG")}`;
 const formatTime = (time: string | null) => (time ? time.slice(0, 5) : "Not specified");
@@ -146,6 +147,41 @@ export default function HotelDetails() {
 
   return (
     <main className="min-h-screen bg-background pb-24 font-sans">
+      <Helmet>
+    <title>{hotel?.name} | Arewa Trips</title>
+
+    <meta
+        name="description"
+        content={
+            hotel?.short_description
+                ? hotel.short_description
+                : `Book ${hotel?.name} on Arewa Trips`
+        }
+    />
+
+    <meta
+        property="og:title"
+        content={`${hotel?.name} | Arewa Trips`}
+    />
+
+    <meta
+        property="og:description"
+        content={
+            hotel?.short_description
+                ? hotel.short_description
+                : `Book ${hotel?.name} on Arewa Trips`
+        }
+    />
+
+    <meta property="og:image" content={hotel?.thumbnail} />
+
+    <meta
+        property="og:url"
+        content={`https://arewatrips.netlify.app/hotels/${hotel?.slug}`}
+    />
+
+    <meta property="og:type" content="website" />
+</Helmet>
       <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 sm:py-8">
         <HotelCarousel
           images={imageUrls}
