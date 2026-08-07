@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { Banknote, MapPin, MessageCircle, Shield, Star } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import Footer from "@/components/Footer";
 import Navbar from "@/components/Navbar";
 import { supabase } from "@/lib/supabase";
 import type { Hotel } from "@/types/hotel";
+
 
 type HotelListItem = Pick<
   Hotel,
@@ -20,7 +22,7 @@ const trustSignals = [
 const formatNaira = (price: number) => `₦${price.toLocaleString("en-NG")}`;
 
 const Hotels = () => {
-  const navigate = useNavigate();
+
   const [hotels, setHotels] = useState<HotelListItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -70,6 +72,21 @@ const Hotels = () => {
   }, []);
 
   return (
+  <>
+    <Helmet>
+      <title>Hotels in Maiduguri | Arewa Trips</title>
+
+      <meta
+        name="description"
+        content="Browse verified hotels in Maiduguri. Compare rooms, check prices and book on WhatsApp easily with Arewa Trips."
+      />
+
+      <link
+        rel="canonical"
+        href="https://arewatrips.netlify.app/hotels"
+      />
+    </Helmet>
+
     <div className="min-h-screen bg-background">
       <Navbar />
 
@@ -116,11 +133,10 @@ const Hotels = () => {
           {!isLoading && !error && hotels.length > 0 && (
             <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
               {hotels.map((hotel, index) => (
-                <button
+                <Link
                   key={hotel.id}
-                  type="button"
-                  onClick={() => navigate(`/hotels/${hotel.slug}`)}
-                  className="group animate-fade-up overflow-hidden rounded-xl bg-card text-left card-elevated focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                  to={`/hotels/${hotel.slug}`}
+                  className="group block animate-fade-up overflow-hidden rounded-xl bg-card text-left card-elevated focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   style={{ animationDelay: `${0.05 * index}s` }}
                   aria-label={`View ${hotel.name}`}
                 >
@@ -149,7 +165,7 @@ const Hotels = () => {
                       </p>
                     </div>
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           )}
@@ -158,6 +174,7 @@ const Hotels = () => {
 
       <Footer />
     </div>
+  </>
   );
 };
 

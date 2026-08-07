@@ -8,6 +8,7 @@ import DeliveryBookingForm from "@/components/rides/DeliveryBookingForm";
 import RideTypeCard from "@/components/rides/RideTypeCard";
 import PopularRoutes from "@/components/rides/PopularRoutes";
 import RideFAQ from "@/components/rides/RideFAQ";
+import { Helmet } from "react-helmet-async";
 import { cn } from "@/lib/utils";
 import {
   Plane,
@@ -104,6 +105,46 @@ const Rides = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+  <title>
+    Ride Booking & Delivery Services in Maiduguri | Arewa Trips
+  </title>
+
+  <meta
+    name="description"
+    content="Book reliable rides, airport transfers, and package delivery services in Maiduguri with Arewa Trips. Fixed pricing, verified drivers, WhatsApp booking, and fast local transportation."
+  />
+
+  <link
+    rel="canonical"
+    href="https://arewatrips.netlify.app/rides"
+  />
+
+  <meta
+    property="og:title"
+    content="Ride Booking & Delivery Services in Maiduguri | Arewa Trips"
+  />
+
+  <meta
+    property="og:description"
+    content="Book airport transfers, city rides, and package delivery services across Maiduguri. Trusted drivers, transparent pricing, and easy WhatsApp booking."
+  />
+
+  <meta
+    property="og:url"
+    content="https://arewatrips.netlify.app/rides"
+  />
+
+  <meta
+    property="og:type"
+    content="website"
+  />
+
+  <meta
+    property="og:image"
+    content="https://arewatrips.netlify.app/favicon.ico"
+  />
+</Helmet>
       <Navbar />
 
       {/* Hero Section */}

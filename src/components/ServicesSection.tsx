@@ -122,15 +122,16 @@ const ServicesSection = () => {
               </ul>
 
               {/* CTA */}
-              <Link to={service.title === "Ride Booking" ? "/rides" : "/hotels"}>
-                <Button
-                  size="lg"
-                  variant={service.primary ? "gold" : "default"}
-                  className="w-full justify-center"
-                >
+              <Button
+                asChild
+                size="lg"
+                variant={service.primary ? "gold" : "default"}
+                className="w-full justify-center"
+              >
+                <Link to={service.title === "Ride Booking" ? "/rides" : "/hotels"}>
                   {service.cta}
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           ))}
         </div>

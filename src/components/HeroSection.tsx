@@ -41,20 +41,20 @@ const HeroSection = () => {
           {/* CTAs */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-up" style={{ animationDelay: "0.3s" }}>
   {/* Book Hotel Button */}
-  <Link to="/hotels">
-    <Button size="xl" variant="default" className="gap-3">
+  <Button asChild size="xl" variant="default" className="gap-3">
+    <Link to="/hotels">
       <Building2 className="w-5 h-5" />
       Book a Hotel
-    </Button>
-  </Link>
+    </Link>
+  </Button>
 
   {/* Book a Ride Button - remains unchanged */}
-  <Link to="/rides">
-    <Button size="xl" variant="heroOutline" className="gap-3">
+  <Button asChild size="xl" variant="heroOutline" className="gap-3">
+    <Link to="/rides">
       <Car className="w-5 h-5" />
       Book a Ride
-    </Button>
-  </Link>
+    </Link>
+  </Button>
 </div>
           
           {/* Trust Indicators */}

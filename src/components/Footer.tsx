@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { MessageCircle, Mail, Phone, MapPin } from "lucide-react";
 
 const Footer = () => {
@@ -30,14 +31,14 @@ const Footer = () => {
         <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-12 lg:gap-8">
           {/* Brand */}
           <div className="lg:col-span-2">
-            <a href="#" className="flex items-center gap-2 mb-6">
+            <Link to="/" className="flex items-center gap-2 mb-6">
               <div className="w-10 h-10 rounded-xl bg-gradient-gold flex items-center justify-center">
                 <span className="text-accent-foreground font-bold text-lg">A</span>
               </div>
               <span className="font-bold text-xl">
                 Arewa<span className="text-accent">Trips</span>
               </span>
-            </a>
+            </Link>
             <p className="text-primary-foreground/70 mb-6 max-w-sm">
               Your trusted travel partner in Northern Nigeria. Verified hotels, 
               reliable rides, and personal WhatsApp support.

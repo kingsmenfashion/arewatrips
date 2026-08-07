@@ -127,15 +127,14 @@ const Navbar = () => {
       <div className="container mx-auto">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
-          <a
-  href="https://wa.me/2348022444956?text=Hello%2C%20Arewa%20Trips" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2">
+          <Link to="/" className="flex items-center gap-2">
             <div className="w-10 h-10 rounded-xl bg-gradient-green flex items-center justify-center">
               <span className="text-primary-foreground font-bold text-lg">A</span>
             </div>
             <span className="font-bold text-xl text-foreground">
               Arewa<span className="text-accent">Trips</span>
             </span>
-          </a>
+          </Link>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
@@ -223,9 +222,9 @@ const Navbar = () => {
                   <MessageCircle className="w-4 h-4" />
                   WhatsApp Us
                 </Button>
-                <Link to="/rides" onClick={() => setIsOpen(false)}>
-                  <Button className="justify-center w-full">Book Now</Button>
-                </Link>
+                <Button asChild className="justify-center w-full">
+                  <Link to="/rides" onClick={() => setIsOpen(false)}>Book Now</Link>
+                </Button>
               </div>
             </div>
           </div>
